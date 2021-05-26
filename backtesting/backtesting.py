@@ -670,6 +670,7 @@ class _Broker:
         assert 0 < margin <= 1, f"margin should be between 0 and 1, is {margin}"
         self._data: _Data = data
         self._cash = cash
+        self.trades_balance = 0
         self._commission = commission
         self._leverage = 1 / margin
         self._trade_on_close = trade_on_close
@@ -952,7 +953,13 @@ class _Broker:
             self.orders.remove(trade._tp_order)
 
         self.closed_trades.append(trade._replace(exit_price=price, exit_bar=time_index))
-        self._cash += trade.pl
+        self.trades_balance += trade.pl
+
+        if self.trades_balance >= 0:
+            self._cash += (trade.pl - self.trades_balance) + self.trades_balance * .85
+            self.trades_balance = 0
+        else:
+            self._cash += trade.pl
 
     def _open_trade(self, price: float, size: int, sl: float, tp: float, time_index: int):
         trade = Trade(self, size, price, time_index)
