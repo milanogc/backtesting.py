@@ -955,7 +955,7 @@ class _Broker:
         self.closed_trades.append(trade._replace(exit_price=price, exit_bar=time_index))
         self.trades_balance += trade.pl
 
-        if self.trades_balance >= 0:
+        if self.trades_balance > 0:
             self._cash += (trade.pl - self.trades_balance) + self.trades_balance * .85
             self.trades_balance = 0
         else:
@@ -1713,7 +1713,7 @@ class Backtest:
                 raise RuntimeError('First issue `backtest.run()` to obtain results.')
             results = self._results
 
-        plot(
+        return plot(
             results=results,
             df=self._data,
             indicators=results._strategy._indicators,
